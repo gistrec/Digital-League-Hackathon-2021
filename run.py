@@ -367,4 +367,29 @@ updater.start_polling()
 # Run the bot until you press Ctrl-C or the process receives SIGINT,
 # SIGTERM or SIGABRT. This should be used most of the time, since
 # start_polling() is non-blocking and will stop the bot gracefully.
-updater.idle()
+
+
+###### Fast API ########
+from fastapi import FastAPI
+import requests
+import uvicorn
+
+app = FastAPI()
+
+@app.get("/predict/")
+def root(image_url: str = ""):
+    print(image_url)
+    r = requests.get(image_url, allow_redirects=False)
+
+    photo_name = name_generator()
+    open(photo_name, 'wb').write(r.content)
+
+    class_str = predict_onnx(photo_name, ort_session, False)
+    return class_str
+
+@app.get("/")
+def root(image_url: str = ""):
+    return "Ok"
+
+
+uvicorn.run(app, host="46.17.97.44", port=3030)
